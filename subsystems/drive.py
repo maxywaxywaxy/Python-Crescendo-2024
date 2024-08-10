@@ -1,3 +1,7 @@
+# potential ways to increase speed:
+#make the multiplier higher
+
+
 import math
 from utils.math_functions import interpolation_array
 
@@ -29,6 +33,7 @@ class Drive:
         self.front_right.set(speed)
         self.back_right.set(speed)
 
+    #WHAT DOES THIS DO HELP
     def set_velocity(self, rpm):
         self.front_right.set(phoenix5._ctre.TalonFXControlMode.Velocity, rpm)
         self.front_left.set(phoenix5._ctre.TalonFXControlMode.Velocity, rpm)
