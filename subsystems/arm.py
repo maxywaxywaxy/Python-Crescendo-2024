@@ -1,6 +1,6 @@
 # import our clamp function
 from utils.math_functions import clamp, interpolation_array
-
+from utils.pid import PID
 # import math for cos functions
 import math
 
@@ -31,6 +31,7 @@ class Arm:
         # init shooting override value
         self.shooting_override = False
         self.shooting_holding_value = 0
+        self.arm_pid = PID(0.002, 0, 0, 0)
 
     def set_speed(self, speed):
         self.arm_motor_left_front.set(speed)
@@ -90,7 +91,8 @@ class Arm:
         if (error < 0):
             k = self.k_down_interpolation(current_angle)
 
-        proportional = k * error
+        proportional = k * error  # not used anymore
+        pidpower = self.arm_pid.steer_pid(error)
 
         # calculate justified current arm angle in radians
         justifed_angle_radians = current_angle * math.pi / 180
@@ -99,7 +101,7 @@ class Arm:
             self.gravity_compensation = math.cos(justifed_angle_radians) * self.kg_interpolation(current_angle)
 
         # calculate motor power
-        motor_power = self.gravity_compensation + proportional
+        motor_power = self.gravity_compensation + pidpower*1 + proportional*0
 
         # clamp our motor power so we don't move to fast
         motor_power_clamped = clamp(motor_power, -0.05, 0.2)
