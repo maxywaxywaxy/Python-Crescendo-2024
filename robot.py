@@ -125,7 +125,8 @@ class MyRobot(wpilib.TimedRobot):
 
     # ran every 20 ms during teleop
     def teleopPeriodic(self):
-        #print(f"desired: {self.arm.desired_position}, current: {self.arm.get_arm_pitch()}")
+
+        #print(f"desired: {self.arm.desired_position}, current: {self.arm.get_arm_pitch()}"
 
         # get control buttons
         climb_down_button_pressed = self.operator_controller.getAButton()
@@ -152,7 +153,6 @@ class MyRobot(wpilib.TimedRobot):
 
         else:
             self.intake.stop()
-
 
         # ---------- CLIMB ----------
         if climb_up_button_pressed:
@@ -183,12 +183,19 @@ class MyRobot(wpilib.TimedRobot):
 
         if arm_up_button_pressed:
             print (self.arm.get_arm_pitch())
-            self.arm.arm_to_angle(63)
+            self.arm.arm_to_angle(40)
             #if (self.arm.get_arm_pitch() < 60):
                 #print( "M") # self.arm.set_speed(0.25 * math.cos(self.arm.get_arm_pitch() * math.pi / 180))
-        elif intake_position_button_pressed:
-            print (self.arm.get_pitch())
-            
+        
+        #elif intake_position_button_pressed:
+           #print (self.arm.get_pitch())
+           #self.arm.arm_to_angle()
+
+        elif inside_chassis_position_button_pressed:
+            print (self.arm.get_pitch)
+            self.arm.arm_to_angle(40)
+        
+
         elif not amp_blocking_position_button_pressed:
             if (self.arm.get_arm_pitch() > 70):
                 self.arm.set_speed(-0.05)
