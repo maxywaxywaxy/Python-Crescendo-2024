@@ -74,6 +74,8 @@ class Arm:
         return interpolation_array(value, arr)
     
     def arm_to_angle(self, desired_angle):
+
+        #if arm angle is out of bounds, return it.
         if desired_angle < -10 or desired_angle > 90:
             return
 
@@ -136,8 +138,37 @@ class Arm:
         if printout:
             print(f"angle: {self.get_arm_pitch()}, kg: {self.kg_interpolation(current_angle)}, motor power: {motor_power}")
     
+    #make the arm fall slower when reaching pitch = 0
     def soft_drop(self):
-        if (10 > self.get_arm_pitch() > 5):
-            self.set_speed(0.15)
+
+        #Approach one - use cosine
+        """
+        if(25>self.get_arm_pitch()>2):
+            math_val = math.cos(self.get_arm_pitch() * (math.pi / 180))
+            print(math_val / 5)
+            if(25>self.get_arm_pitch() > 10):
+                print(1/(math_val*5))
+                self.set_speed(1/(math_val*6))
+            elif (10>=self.get_arm_pitch() > 2):
+                print(1/(math_val*10))
+                self.set_speed(1/(math_val*10))
+                """
+    
+        #approach two - use diff between angles (speed) to determine needed motor offset
+        """
+        if (25 > self.get_arm_pitch() > 10):
+            self.set_speed(angle_diff * .05)
+        elif (10 >= self.get_arm_pitch() > 3):
+            self.set_speed(angle_diff * .1)
+        """
+
+            #approach three - set intervals and set speed depending on interval    
+            """    
+            self.set_speed(0.25)
+            print("setting speed to .25")
+        elif (5 >= self.get_arm_pitch() > 2.5):
+            self.set_speed(0.125)
+            print("setting speed to .125")
         else:
             self.set_speed(0)
+            """

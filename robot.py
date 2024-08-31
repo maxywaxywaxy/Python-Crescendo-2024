@@ -104,6 +104,10 @@ class MyRobot(wpilib.TimedRobot):
         # switch to turn on or off drive
         self.enable_drive = True
 
+        self.angle_two = 60
+
+        #testing variable
+        #self.up = False
     # setup before our robot transitions to autonomous
     def autonomousInit(self):
         # create instance of our autonomous code
@@ -183,7 +187,7 @@ class MyRobot(wpilib.TimedRobot):
 
         if arm_up_button_pressed:
             print (self.arm.get_arm_pitch())
-            self.arm.arm_to_angle(40)
+            self.arm.arm_to_angle(80)
             #if (self.arm.get_arm_pitch() < 60):
                 #print( "M") # self.arm.set_speed(0.25 * math.cos(self.arm.get_arm_pitch() * math.pi / 180))
         
@@ -192,18 +196,31 @@ class MyRobot(wpilib.TimedRobot):
            #self.arm.arm_to_angle()
 
         elif inside_chassis_position_button_pressed:
-            print (self.arm.get_pitch)
+            print (self.arm.get_arm_pitch())
             self.arm.arm_to_angle(40)
-        
+
+        elif shooting_position_button_pressed:
+            print(self.arm.get_arm_pitch())
+            self.arm.arm_to_angle(20)
+
+        # drop the arm softly to not damage it
+        elif (intake_position_button_pressed):
+            #print(self.arm.get_arm_pitch())
+            #implementing soft drop (testing w/ gravity)
+            #angle_one = self.angle_two
+            #self.angle_two = self.arm.get_arm_pitch()
+            #angle_diff = angle_one - self.angle_two
+            self.arm.soft_drop()
+            
+            #if(angle_diff > 0 and angle_diff < 10):
+                #self.arm.soft_drop(angle_diff)
 
         elif not amp_blocking_position_button_pressed:
             if (self.arm.get_arm_pitch() > 70):
                 self.arm.set_speed(-0.05)
             else:
                 self.arm.set_speed(0.06)
-        # drop the arm softly to not damage it
-        if (intake_position_button_pressed):
-            self.arm.soft_drop()
+ 
         
         # check if drive is enabled
         if self.enable_drive:
