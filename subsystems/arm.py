@@ -91,8 +91,7 @@ class Arm:
         if (error < 0):
             k = self.k_down_interpolation(current_angle)
 
-        proportional = k * error  # not used anymore
-        pidpower = self.arm_pid.steer_pid(error)
+        proportional = k * error
 
         # calculate justified current arm angle in radians
         justifed_angle_radians = current_angle * math.pi / 180
@@ -101,7 +100,7 @@ class Arm:
             self.gravity_compensation = math.cos(justifed_angle_radians) * self.kg_interpolation(current_angle)
 
         # calculate motor power
-        motor_power = self.gravity_compensation + pidpower*1 + proportional*0
+        motor_power = self.gravity_compensation + proportional
 
         # clamp our motor power so we don't move to fast
         motor_power_clamped = clamp(motor_power, -0.05, 0.2)
@@ -136,3 +135,9 @@ class Arm:
 
         if printout:
             print(f"angle: {self.get_arm_pitch()}, kg: {self.kg_interpolation(current_angle)}, motor power: {motor_power}")
+    
+    def soft_drop(self):
+        if (10 > self.get_arm_pitch() > 5):
+            self.set_speed(0.15)
+        else:
+            self.set_speed(0)
