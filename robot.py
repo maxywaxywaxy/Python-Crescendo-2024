@@ -28,6 +28,11 @@ from utils import constants
 class MyRobot(wpilib.TimedRobot):
     # initialize motors and sensors - create references to physical parts of our robot
     def robotInit(self):
+            # create reference to our intake motor
+        #self.intake_motor = rev.CANSparkMax(constants.INTAKE_MOTOR_ID, rev.CANSparkLowLevel.MotorType.kBrushless)
+        print("Robot init 1")
+        self.intake_motor = rev.CANSparkMax(constants.INTAKE_MOTOR_ID, rev.CANSparkLowLevel.MotorType.kBrushless)
+        print("Robot init 2")
         # create reference to our Falcon 500 motors for driving
         self.front_right = phoenix5._ctre.WPI_TalonFX(constants.FRONT_RIGHT_ID)
         self.front_left = phoenix5._ctre.WPI_TalonFX(constants.FRONT_LEFT_ID)
@@ -38,9 +43,15 @@ class MyRobot(wpilib.TimedRobot):
         self.front_right.setInverted(True)
         self.back_right.setInverted(True)
 
-        # create a reference to our IMU
-        self.imu_motor_controller = phoenix5._ctre.WPI_TalonSRX(constants.IMU_ID)
-        self.imu = IMU(self.imu_motor_controller)
+
+
+
+        print("Robot init 3")
+        # create a reference to our drivimg IMU
+        #self.imu_motor_controller = phoenix5._ctre.WPI_TalonSRX(constants.IMU_ID)
+        #self.imu = IMU(self.imu_motor_controller)
+        self.imu = 0
+        print("Robot init 4")
 
         #create reference to our Falcon motors
         self.shooter_upper_motor = phoenix5._ctre.WPI_TalonFX(constants.SHOOTER_UPPER_MOTOR_ID)
@@ -49,8 +60,7 @@ class MyRobot(wpilib.TimedRobot):
         self.shooter_upper_motor.setInverted(True)
         self.shooter_lower_motor.setInverted(True)
 
-        # create reference to our intake motor
-        self.intake_motor = rev.CANSparkMax(constants.INTAKE_MOTOR_ID, rev.CANSparkLowLevel.MotorType.kBrushless)
+
 
         #reference to the two arm motors that move it up and down
         self.arm_motor_left_front = rev.CANSparkMax(constants.ARM_LEFT_FRONT_ID, rev.CANSparkLowLevel.MotorType.kBrushless)
@@ -72,7 +82,7 @@ class MyRobot(wpilib.TimedRobot):
         self.climb_motor_right_front = phoenix5._ctre.WPI_TalonSRX(constants.CLIMB_MOTOR_RIGHT_FRONT_ID)
         self.climb_motor_left_back = phoenix5._ctre.WPI_TalonSRX(constants.CLIMB_MOTOR_LEFT_BACK_ID)
         self.climb_motor_right_back = phoenix5._ctre.WPI_TalonSRX(constants.CLIMB_MOTOR_RIGHT_BACK_ID)
-
+        
         # instances of our subsystems - passing in references to motors, sensors, etc.
         self.arm = Arm(self.arm_motor_left_front, self.arm_motor_left_back, self.arm_motor_right_front, self.arm_motor_right_back, self.arm_imu)
         self.intake = Intake(self.intake_motor)
@@ -166,13 +176,19 @@ class MyRobot(wpilib.TimedRobot):
             else:
                 self.shooter.stop()
 
+        #desired positions: up, down, shooting angle
         if amp_blocking_position_button_pressed:
             self.arm.desired_position = 85
             self.arm.arm_to_angle(self.arm.desired_position)
 
         if arm_up_button_pressed:
-            if (self.arm.get_arm_pitch() < 60):
-                self.arm.set_speed(0.25 * math.cos(self.arm.get_arm_pitch() * math.pi / 180))
+            print (self.arm.get_arm_pitch())
+            self.arm.arm_to_angle(63)
+            #if (self.arm.get_arm_pitch() < 60):
+                #print( "M") # self.arm.set_speed(0.25 * math.cos(self.arm.get_arm_pitch() * math.pi / 180))
+        elif intake_position_button_pressed:
+            print (self.arm.get_pitch())
+            
         elif not amp_blocking_position_button_pressed:
             if (self.arm.get_arm_pitch() > 70):
                 self.arm.set_speed(-0.05)
@@ -197,8 +213,8 @@ class MyRobot(wpilib.TimedRobot):
             self.drive.field_oriented_drive(joystick_x, joystick_y, joystick_turning)
             
             # if we click button 11 on the flight stick, reset the IMU yaw
-            if reset_imu_button_pressed:
-                self.imu.reset_yaw()
+            #if reset_imu_button_pressed:
+            #    self.imu.reset_yaw()
         
         
 # run our robot code
