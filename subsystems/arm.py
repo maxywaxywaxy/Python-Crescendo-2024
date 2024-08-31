@@ -87,9 +87,9 @@ class Arm:
 
         # calculate proportional term
         #pid_value = self.arm_pid.keep_integral(error)
-
         k = self.kp
 
+        #if the error is zero meaning that the arm has to move up
         if (error < 0):
             k = self.k_down_interpolation(current_angle)
 
@@ -98,7 +98,9 @@ class Arm:
         # calculate justified current arm angle in radians
         justifed_angle_radians = current_angle * math.pi / 180
 
+        #if esired angle isn't reached
         if current_angle < desired_angle - 1 or current_angle > desired_angle + 1:
+            #gravity taken into account through angle measure and interpolation array of the current angle
             self.gravity_compensation = math.cos(justifed_angle_radians) * self.kg_interpolation(current_angle)
 
         # calculate motor power
@@ -140,10 +142,11 @@ class Arm:
     
     #make the arm fall slower when reaching pitch = 0
     def soft_drop(self):
+        #if(25>self.get_arm_pitch()>2):
 
         #Approach one - use cosine
         """
-        if(25>self.get_arm_pitch()>2):
+       
             math_val = math.cos(self.get_arm_pitch() * (math.pi / 180))
             print(math_val / 5)
             if(25>self.get_arm_pitch() > 10):
@@ -152,7 +155,7 @@ class Arm:
             elif (10>=self.get_arm_pitch() > 2):
                 print(1/(math_val*10))
                 self.set_speed(1/(math_val*10))
-                """
+        """
     
         #approach two - use diff between angles (speed) to determine needed motor offset
         """
@@ -162,8 +165,8 @@ class Arm:
             self.set_speed(angle_diff * .1)
         """
 
-            #approach three - set intervals and set speed depending on interval    
-            """    
+        #approach three - set intervals and set speed depending on interval    
+        """    
             self.set_speed(0.25)
             print("setting speed to .25")
         elif (5 >= self.get_arm_pitch() > 2.5):
@@ -171,4 +174,13 @@ class Arm:
             print("setting speed to .125")
         else:
             self.set_speed(0)
-            """
+        """
+
+        #approach four - some square root thingy
+        """
+        sqrt_val = sqrt(arm_pitch)
+        #value will be between 5 and ~1.7
+        multiply value by a scalar
+            scalar should start at 1/25 when val is near 5
+            should end at 1/17 when value is near 1.7
+        """
