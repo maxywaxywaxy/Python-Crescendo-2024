@@ -178,7 +178,9 @@ class MyRobot(wpilib.TimedRobot):
                 self.arm.set_speed(-0.05)
             else:
                 self.arm.set_speed(0.06)
- 
+        # drop the arm softly to not damage it
+        if (intake_position_button_pressed):
+            self.arm.soft_drop()
         
         # check if drive is enabled
         if self.enable_drive:
