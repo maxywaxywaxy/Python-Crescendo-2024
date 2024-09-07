@@ -19,8 +19,11 @@ class Arm:
         # proportional constant
         self.kp = 0.002
 
-        # init gravity compensation
-        self.gravity_compensation = 0
+        # # init gravity compensation
+        # self.gravity_compensation = 0
+
+        #calculating gravity compensation
+        self.gravity_comp = 0.14 * math.cos(self.get_arm_pitch() * math.pi / 180)
 
         #make previous error zero
         self.arm_val = 0
@@ -31,7 +34,7 @@ class Arm:
         # init shooting override value
         self.shooting_override = False
         self.shooting_holding_value = 0
-        self.arm_pid = PID(0.002, 0, 0, 0)
+        self.arm_pid = PID(0.0027, 0.00003, 0.00512, 0)
 
     def set_speed(self, speed):
         self.arm_motor_left_front.set(speed)
@@ -94,20 +97,22 @@ class Arm:
             k = self.k_down_interpolation(current_angle)
 
         proportional = k * error
+        pid = self.arm_pid.steer_pid(error)
 
         # calculate justified current arm angle in radians
         justifed_angle_radians = current_angle * math.pi / 180
 
-        #if esired angle isn't reached
-        if current_angle < desired_angle - 1 or current_angle > desired_angle + 1:
-            #gravity taken into account through angle measure and interpolation array of the current angle
-            self.gravity_compensation = math.cos(justifed_angle_radians) * self.kg_interpolation(current_angle)
+        # #if esired angle isn't reached
+        # if current_angle < desired_angle - 1 or current_angle > desired_angle + 1:
+        #     #gravity taken into account through angle measure and interpolation array of the current angle
+        #     self.gravity_compensation = math.cos(justifed_angle_radians) * self.kg_interpolation(current_angle)
 
         # calculate motor power
-        motor_power = self.gravity_compensation + proportional
+        motor_power = pid + self.gravity_comp
+
 
         # clamp our motor power so we don't move to fast
-        motor_power_clamped = clamp(motor_power, -0.05, 0.2)
+        motor_power_clamped = clamp(motor_power, -0.03, 0.25)
 
         # check if not shooting
         if not self.shooting_override:
@@ -128,11 +133,11 @@ class Arm:
          # calculate justified current arm angle in radians
         justifed_angle_radians = current_angle * math.pi / 180
 
-        # calculate gravity compensation
-        gravity_compensation = math.cos(justifed_angle_radians) * self.kg_interpolation(current_angle)
+        # # calculate gravity compensation
+        # gravity_compensation = math.cos(justifed_angle_radians) * self.kg_interpolation(current_angle)
 
         # calculate motor power
-        motor_power = clamp(gravity_compensation, -0.2, 0.23)
+        motor_power = clamp(self.gravity_comp, -0.2, 0.23)
 
         # spin motors
         self.set_speed(motor_power)
@@ -166,15 +171,14 @@ class Arm:
         """
 
         #approach three - set intervals and set speed depending on interval    
-        """    
-            self.set_speed(0.25)
-            print("setting speed to .25")
-        elif (5 >= self.get_arm_pitch() > 2.5):
-            self.set_speed(0.125)
-            print("setting speed to .125")
-        else:
-            self.set_speed(0)
-        """
+        # if (25 > self.get_arm_pitch > 5):
+        #     self.set_speed(0.25)
+        #     print("setting speed to .25")
+        # elif (5 >= self.get_arm_pitch() > 2.5):
+        #     self.set_speed(0.125)
+        #     print("setting speed to .125")
+        # else:
+        #     self.set_speed(0)
 
         #approach four - some square root thingy
         """
@@ -184,3 +188,9 @@ class Arm:
             scalar should start at 1/25 when val is near 5
             should end at 1/17 when value is near 1.7
         """
+
+        #approach five - use gravity compensation
+        if (self.get_arm_pitch() > 2.5):
+            self.arm_to_angle(2.5)
+        else:
+            self.set_speed(0)

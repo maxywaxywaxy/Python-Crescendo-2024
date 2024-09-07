@@ -106,6 +106,9 @@ class MyRobot(wpilib.TimedRobot):
 
         self.angle_two = 60
 
+        #arm angle timer initiation
+        self.arm_timer = 0
+
         #testing variable
         #self.up = False
     # setup before our robot transitions to autonomous
@@ -116,6 +119,9 @@ class MyRobot(wpilib.TimedRobot):
 
     # ran every 20 ms during autonomous mode
     def autonomousPeriodic(self):
+
+        #calculating gravity compensation
+        self.arm.gravity_comp = 0.14 * math.cos(self.arm.get_arm_pitch() * math.pi / 180)
         self.autonomous.two_note_auto()
          
     # setup before our robot transitions to teleop (where we control with a joystick or custom controller)
@@ -129,6 +135,9 @@ class MyRobot(wpilib.TimedRobot):
 
     # ran every 20 ms during teleop
     def teleopPeriodic(self):
+
+        #calculating gravity compensation
+        self.arm.gravity_comp = 0.14 * math.cos(self.arm.get_arm_pitch() * math.pi / 180)
 
         #print(f"desired: {self.arm.desired_position}, current: {self.arm.get_arm_pitch()}"
 
@@ -183,43 +192,66 @@ class MyRobot(wpilib.TimedRobot):
         #desired positions: up, down, shooting angle
         if amp_blocking_position_button_pressed:
             self.arm.desired_position = 85
+            # self.arm.arm_to_angle(self.arm.desired_position)
+        
+            # 0.25 = too strong
+            # 0.14 = 
+            # 0.125 = slightly too weak
+
+        elif arm_up_button_pressed:
+            self.arm.desired_position = 80
+        elif inside_chassis_position_button_pressed:
+            self.arm.desired_position = 40
+        elif shooting_position_button_pressed:
+            self.arm.desired_position = 20
+        elif intake_position_button_pressed:
+            self.arm.soft_drop()
+            self.arm.desired_position = 0
+       # else:
+            #self.arm.desired_position = self.arm.get_arm_pitch()
+
+        # if (not intake_position_button_pressed):
+        if (self.arm.desired_position > 0):
             self.arm.arm_to_angle(self.arm.desired_position)
 
-        if arm_up_button_pressed:
-            print (self.arm.get_arm_pitch())
-            self.arm.arm_to_angle(80)
-            #if (self.arm.get_arm_pitch() < 60):
-                #print( "M") # self.arm.set_speed(0.25 * math.cos(self.arm.get_arm_pitch() * math.pi / 180))
-        
-        #elif intake_position_button_pressed:
-           #print (self.arm.get_pitch())
-           #self.arm.arm_to_angle()
+        self.arm_timer = self.arm_timer + 1
+        if(self.arm_timer % 25 == 0):
+            print("arm angle = ", self.arm.get_arm_pitch(), "destination angle = ", self.arm.desired_position, " ", self.arm.arm_pid.integral)
+        # if arm_up_button_pressed:
+        #     print (self.arm.get_arm_pitch())
+        #     self.arm.arm_to_angle(80)
+        #     #if (self.arm.get_arm_pitch() < 60):
+        #         #print( "M") # self.arm.set_speed(0.14 * math.cos(self.arm.get_arm_pitch() * math.pi / 180))
 
-        elif inside_chassis_position_button_pressed:
-            print (self.arm.get_arm_pitch())
-            self.arm.arm_to_angle(40)
+        # #elif intake_position_button_pressed:
+        #    #print (self.arm.get_pitch())
+        #    #self.arm.arm_to_angle()
 
-        elif shooting_position_button_pressed:
-            print(self.arm.get_arm_pitch())
-            self.arm.arm_to_angle(20)
+        # elif inside_chassis_position_button_pressed:
+        #     print (self.arm.get_arm_pitch())
+        #     self.arm.arm_to_angle(40)
 
-        # drop the arm softly to not damage it
-        elif (intake_position_button_pressed):
-            #print(self.arm.get_arm_pitch())
-            #implementing soft drop (testing w/ gravity)
-            #angle_one = self.angle_two
-            #self.angle_two = self.arm.get_arm_pitch()
-            #angle_diff = angle_one - self.angle_two
-            self.arm.soft_drop()
+        # elif shooting_position_button_pressed:
+        #     print(self.arm.get_arm_pitch())
+        #     self.arm.arm_to_angle(20)
+
+        # # drop the arm softly to not damage it
+        # elif (intake_position_button_pressed):
+        #     #print(self.arm.get_arm_pitch())
+        #     #implementing soft drop (testing w/ gravity)
+        #     #angle_one = self.angle_two
+        #     #self.angle_two = self.arm.get_arm_pitch()
+        #     #angle_diff = angle_one - self.angle_two
+        #     self.arm.soft_drop()
             
-            #if(angle_diff > 0 and angle_diff < 10):
-                #self.arm.soft_drop(angle_diff)
+        #     #if(angle_diff > 0 and angle_diff < 10):
+        #         #self.arm.soft_drop(angle_diff)
 
-        elif not amp_blocking_position_button_pressed:
-            if (self.arm.get_arm_pitch() > 70):
-                self.arm.set_speed(-0.05)
-            else:
-                self.arm.set_speed(0.06)
+        # elif not amp_blocking_position_button_pressed:
+        #     if (self.arm.get_arm_pitch() > 70):
+        #         self.arm.set_speed(-0.05)
+        #     else:
+        #         self.arm.set_speed(0.06)
  
         
         # check if drive is enabled
