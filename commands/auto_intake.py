@@ -5,6 +5,7 @@ from subsystems.networking import NetworkReciever
 from commands.descend import Descend
 
 from wpilib import Timer
+from wpilib import DigitalInput
 
 
 class AutoIntake:
@@ -19,13 +20,14 @@ class AutoIntake:
 
         self.drive = _drive
         self.descend = _descend
-        self.intake = _intake
+        self.intake = _intake 
         self.networking = _networking
 
         self.timer = Timer()
         self.drive_and_intake_start_time = 0.0
 
     def auto_intake(self):
+        DigitalInput(0: int)
         if self.stage == self.IDLE:
             # perform checks
             self.stage == self.ARM_DOWN
