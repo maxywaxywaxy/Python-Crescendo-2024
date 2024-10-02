@@ -38,7 +38,7 @@ class AutoIntake:
             if self.IR_Loading.get() == 1 or self.IR_Ready.get() == 1 :
                 return
             #checks if the arm is down
-            if self.imu.get_pitch() != 0:
+            if self.imu.get_pitch() >=5:
                 return
             #if both tests passed, begin to intake
             self.stage = self.INTAKE_1
