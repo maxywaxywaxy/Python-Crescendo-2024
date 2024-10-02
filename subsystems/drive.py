@@ -101,8 +101,6 @@ class Drive:
         [1,1]]
 
         return interpolation_array(value, arr)
-    
-
 
     #field oriented drive
     #same mecanum drive train except the drive is no longer robot-oriented and is field-oriented
@@ -122,10 +120,6 @@ class Drive:
 
         #takes angle and converts into radians
         robot_angle_in_radians = robot_angle_in_degrees*math.pi/180
-
-        #resets the direction that we use as the true forwards
-        #random key that we'll never randomly press
-        #if(self.controller.get)
 
         #rotates joystick values based on what angle the robot is at
         rotated_x = joystick_x*math.cos(-robot_angle_in_radians)-joystick_y*math.sin(-robot_angle_in_radians)

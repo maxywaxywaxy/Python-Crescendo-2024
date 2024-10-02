@@ -150,10 +150,11 @@ class MyRobot(wpilib.TimedRobot):
         inside_chassis_position_button_pressed = self.operator_controller.getPOV() == 90
         intake_position_button_pressed = self.operator_controller.getPOV() == 180
         shooting_position_button_pressed = self.operator_controller.getPOV() == 270
+        arm_up_button_pressed = self.operator_controller.getLeftTriggerAxis() == 1
+
         under_stage_button_pressed = self.driver_controller.getTriggerPressed()
         reset_imu_button_pressed = self.driver_controller.getRawButton(11)
-        arm_up_button_pressed = self.operator_controller.getLeftTriggerAxis() == 1
-       
+        
         # ---------- INTAKE ----------
         if intake_button_pressed:
             self.intake.intake_spin(1)
