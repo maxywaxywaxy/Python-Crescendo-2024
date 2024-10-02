@@ -1,0 +1,10 @@
+DONE:
+CLIMB
+
+NEEDS TESTING:
+Drive
+Arm?
+
+NEEDS CODING:
+Intake
+Shoot

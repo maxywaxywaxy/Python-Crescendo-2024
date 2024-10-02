@@ -19,6 +19,7 @@ class Drive:
         self.back_left = _back_left
         self.back_right = _back_right
 
+        self.imu = _imu
         # create reference to our imu which is passed into our Drive class from robot.py
         # disabled temporarily
         #self.imu = _imu
@@ -117,7 +118,7 @@ class Drive:
         
         #gets angle of the robot compared to the true forwards that was set. stores it in the variable
         # IMU disabled FOR NOW
-        robot_angle_in_degrees = 0 # self.imu.get_yaw()
+        robot_angle_in_degrees = self.imu.get_yaw()
 
         #takes angle and converts into radians
         robot_angle_in_radians = robot_angle_in_degrees*math.pi/180
