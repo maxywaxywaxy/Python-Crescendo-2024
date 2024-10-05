@@ -19,6 +19,7 @@ class Drive:
         self.back_left = _back_left
         self.back_right = _back_right
 
+        self.imu = _imu
         # create reference to our imu which is passed into our Drive class from robot.py
         # disabled temporarily
         #self.imu = _imu
@@ -100,8 +101,6 @@ class Drive:
         [1,1]]
 
         return interpolation_array(value, arr)
-    
-
 
     #field oriented drive
     #same mecanum drive train except the drive is no longer robot-oriented and is field-oriented
@@ -117,14 +116,10 @@ class Drive:
         
         #gets angle of the robot compared to the true forwards that was set. stores it in the variable
         # IMU disabled FOR NOW
-        robot_angle_in_degrees = 0 # self.imu.get_yaw()
+        robot_angle_in_degrees = self.imu.get_yaw()
 
         #takes angle and converts into radians
         robot_angle_in_radians = robot_angle_in_degrees*math.pi/180
-
-        #resets the direction that we use as the true forwards
-        #random key that we'll never randomly press
-        #if(self.controller.get)
 
         #rotates joystick values based on what angle the robot is at
         rotated_x = joystick_x*math.cos(-robot_angle_in_radians)-joystick_y*math.sin(-robot_angle_in_radians)

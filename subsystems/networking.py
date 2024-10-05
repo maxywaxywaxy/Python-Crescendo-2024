@@ -35,7 +35,8 @@ class NetworkReciever():
         note_x = self.dashboard.getNumber("note_x", None)
         note_y = self.dashboard.getNumber("note_y", None)
         note_distance = self.dashboard.getNumber("note_distance", None)
-
+        # Above line is incrorrect, needs to get note detection of type bool
+        # Will tell you wether or not you are currently seeing a note
         if note_x is None:
             return None
 

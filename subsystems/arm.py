@@ -13,7 +13,6 @@ class Arm:
 
         self.arm_motor_right_front = _arm_motor_right_front
         self.arm_motor_right_back = _arm_motor_right_back
-
         self.arm_imu = _arm_imu
 
         # proportional constant
@@ -34,7 +33,7 @@ class Arm:
         # init shooting override value
         self.shooting_override = False
         self.shooting_holding_value = 0
-        self.arm_pid = PID(0.0027, 0.00003, 0.00512, 0)
+        self.arm_pid = PID(0.0027, 0.00002, 0.02048, 0)
 
     def set_speed(self, speed):
         self.arm_motor_left_front.set(speed)
@@ -126,6 +125,7 @@ class Arm:
         else:
             self.set_speed(motor_power_clamped)
     
+    #not in use
     def arm_gravity_test(self, printout):
         # get the current angle from the IMU
         current_angle = self.get_arm_pitch()
@@ -146,6 +146,8 @@ class Arm:
             print(f"angle: {self.get_arm_pitch()}, kg: {self.kg_interpolation(current_angle)}, motor power: {motor_power}")
     
     #make the arm fall slower when reaching pitch = 0
+    
+    #THIS IS NOT A SOFT DROP. DONUT USE. This is one of the only ways to slam the arm.
     def soft_drop(self):
         #if(25>self.get_arm_pitch()>2):
 

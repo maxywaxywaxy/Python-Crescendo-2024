@@ -13,6 +13,7 @@ from subsystems.intake import Intake
 from subsystems.arm import Arm
 from subsystems.imu import IMU
 from subsystems.climb import Climb
+from commands.auto_drive import autoDrive
 
 # import commands
 from commands.amp_align import AmpAlign
@@ -42,15 +43,12 @@ class MyRobot(wpilib.TimedRobot):
         # invert the motors on the right side of our robot
         self.front_right.setInverted(True)
         self.back_right.setInverted(True)
-
-
-
-
+        
         print("Robot init 3")
         # create a reference to our drivimg IMU
         #self.imu_motor_controller = phoenix5._ctre.WPI_TalonSRX(constants.IMU_ID)
         #self.imu = IMU(self.imu_motor_controller)
-        self.imu = 0
+        #self.imu = 0
         print("Robot init 4")
 
         #create reference to our Falcon motors
@@ -59,8 +57,6 @@ class MyRobot(wpilib.TimedRobot):
 
         self.shooter_upper_motor.setInverted(True)
         self.shooter_lower_motor.setInverted(True)
-
-
 
         #reference to the two arm motors that move it up and down
         self.arm_motor_left_front = rev.CANSparkMax(constants.ARM_LEFT_FRONT_ID, rev.CANSparkLowLevel.MotorType.kBrushless)
@@ -73,7 +69,7 @@ class MyRobot(wpilib.TimedRobot):
         self.arm_motor_left_front.setInverted(True)
         self.arm_motor_left_back.setInverted(True)
 
-        # reference to our arm IMU
+        # reference to our arm IMU (also used for field-oriented)
         self.arm_imu_motor_controller = phoenix5._ctre.WPI_TalonSRX(constants.ARM_IMU_ID)
         self.arm_imu = IMU(self.arm_imu_motor_controller)
 
@@ -86,7 +82,7 @@ class MyRobot(wpilib.TimedRobot):
         # instances of our subsystems - passing in references to motors, sensors, etc.
         self.arm = Arm(self.arm_motor_left_front, self.arm_motor_left_back, self.arm_motor_right_front, self.arm_motor_right_back, self.arm_imu)
         self.intake = Intake(self.intake_motor)
-        self.drive = Drive(self.front_right, self.front_left, self.back_left, self.back_right, self.imu)
+        self.drive = Drive(self.front_right, self.front_left, self.back_left, self.back_right, self.arm_imu)
         self.shooter = Shooter(self.shooter_lower_motor, self.shooter_upper_motor)
         self.climb = Climb(self.climb_motor_left_front, self.climb_motor_right_front, self.climb_motor_left_back, self.climb_motor_right_back)
 
@@ -126,16 +122,18 @@ class MyRobot(wpilib.TimedRobot):
          
     # setup before our robot transitions to teleop (where we control with a joystick or custom controller)
     def teleopInit(self):
+        
         self.descend.descending = False
         self.descend.stage = self.descend.IDLE
         self.amp_align.stage = self.amp_align.IDLE
+        self.arm.start_angle = self.arm_imu.get_pitch()
 
         if abs(self.arm.get_arm_pitch() - 80) < 10:
             self.arm.desired_position = 86
-
+        
     # ran every 20 ms during teleop
     def teleopPeriodic(self):
-
+        
         #calculating gravity compensation
         self.arm.gravity_comp = 0.14 * math.cos(self.arm.get_arm_pitch() * math.pi / 180)
 
@@ -148,18 +146,21 @@ class MyRobot(wpilib.TimedRobot):
         amp_align_button_pressed = self.operator_controller.getYButton()
         amp_shoot_button_pressed = self.operator_controller.getBButton()
         intake_button_pressed = self.operator_controller.getRightBumper()
-        outtake_button_pressed = self.operator_controller.getLeftBumper() 
+        outtake_button_pressed = self.operator_controller.getLeftBumper()
         amp_blocking_position_button_pressed = self.operator_controller.getPOV() == 0
-        inside_chassis_position_button_pressed = self.operator_controller.getPOV() == 90
+        # inside_chassis_position_button_pressed = self.operator_controller.getPOV() == 90
+        auto_get_note = self.operator_controller.getPOV() == 90
         intake_position_button_pressed = self.operator_controller.getPOV() == 180
         shooting_position_button_pressed = self.operator_controller.getPOV() == 270
+        arm_up_button_pressed = self.operator_controller.getLeftTriggerAxis() == 1
+
         under_stage_button_pressed = self.driver_controller.getTriggerPressed()
         reset_imu_button_pressed = self.driver_controller.getRawButton(11)
-        arm_up_button_pressed = self.operator_controller.getLeftTriggerAxis() == 1
-       
+        
         # ---------- INTAKE ----------
         if intake_button_pressed:
             self.intake.intake_spin(1)
+            #self.auto_intake.auto_intake_with_sensors()
                          
         elif outtake_button_pressed:
             self.intake.intake_spin(-1)
@@ -177,7 +178,6 @@ class MyRobot(wpilib.TimedRobot):
         else:
             self.climb.stop()
         
-
         # ---------- SHOOTER ----------
         if shoot_button_pressed:
             self.shooter.shooter_spin(1)
@@ -191,7 +191,8 @@ class MyRobot(wpilib.TimedRobot):
 
         #desired positions: up, down, shooting angle
         if amp_blocking_position_button_pressed:
-            self.arm.desired_position = 85
+            # PREVIOUSLY 85
+            self.arm.desired_position = 67
             # self.arm.arm_to_angle(self.arm.desired_position)
         
             # 0.25 = too strong
@@ -200,8 +201,10 @@ class MyRobot(wpilib.TimedRobot):
 
         elif arm_up_button_pressed:
             self.arm.desired_position = 80
-        elif inside_chassis_position_button_pressed:
-            self.arm.desired_position = 40
+        # elif inside_chassis_position_button_pressed:  
+        #     self.arm.desired_position = 40
+        elif auto_get_note:
+            autoDrive()
         elif shooting_position_button_pressed:
             self.arm.desired_position = 20
         elif intake_position_button_pressed:
@@ -209,14 +212,13 @@ class MyRobot(wpilib.TimedRobot):
             self.arm.desired_position = 0
        # else:
             #self.arm.desired_position = self.arm.get_arm_pitch()
-
         # if (not intake_position_button_pressed):
-        if (self.arm.desired_position > 0):
-            self.arm.arm_to_angle(self.arm.desired_position)
+        # if (self.arm.desired_position > 0):
+        #     self.arm.arm_to_angle(self.arm.desired_position)
 
         self.arm_timer = self.arm_timer + 1
         if(self.arm_timer % 25 == 0):
-            print("arm angle = ", self.arm.get_arm_pitch(), "destination angle = ", self.arm.desired_position, " ", self.arm.arm_pid.integral)
+            print("arm angle = ", self.arm.get_arm_pitch(), "destination angle = ", self.arm.desired_position, " ", self.arm.arm_pid.integral, " ", self.arm.start_angle)
         # if arm_up_button_pressed:
         #     print (self.arm.get_arm_pitch())
         #     self.arm.arm_to_angle(80)
@@ -271,8 +273,8 @@ class MyRobot(wpilib.TimedRobot):
             self.drive.field_oriented_drive(joystick_x, joystick_y, joystick_turning)
             
             # if we click button 11 on the flight stick, reset the IMU yaw
-            #if reset_imu_button_pressed:
-            #    self.imu.reset_yaw()
+            if reset_imu_button_pressed:
+                self.arm_imu.reset_yaw()
         
         
 # run our robot code
