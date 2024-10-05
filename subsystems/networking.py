@@ -29,16 +29,16 @@ class NetworkReciever():
         return [apriltag_x, apriltag_y, apriltag_distance, apriltag_id, sees_tag]
     
     # method to retrieve the x and y positions of the note from the camera
-    # same as apriltags where (0, 0) is in th center of the screen
+    # same as apriltags where (0, 0) is in the center of the screen
     # we can use the same fact to aim the robot towards the note, which is useful for auto intake
     def get_note_data(self):
         note_x = self.dashboard.getNumber("note_x", None)
         note_y = self.dashboard.getNumber("note_y", None)
-        note_distance = self.dashboard.getNumber("note_distance", None)
+        note_detected = self.dashboard.getBoolean("noteDetected", None)
         # Above line is incrorrect, needs to get note detection of type bool
-        # Will tell you wether or not you are currently seeing a note
+        # Will tell you whether or not you are currently seeing a note
         if note_x is None:
             return None
 
         # return the x and y positions of the note in an array
-        return [note_x, note_y, note_distance]
+        return [note_x, note_y, note_detected]

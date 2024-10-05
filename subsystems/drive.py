@@ -42,7 +42,7 @@ class Drive:
         self.back_right.set(phoenix5._ctre.TalonFXControlMode.Velocity, rpm)
 
 
-    #tank drive - left joystick sets speed of left motors, right joystick sets speed of right motors
+    # tank drive - left joystick sets speed of left motors, right joystick sets speed of right motors
     def tank_drive(self, left_joystick, right_joystick):
         self.set_left_speed(left_joystick)
         self.set_right_speed(right_joystick)

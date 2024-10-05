@@ -58,7 +58,7 @@ class AutoIntake:
                 self.stage = self.FINISHED
 
     def auto_intake(self):
-        DigitalInput(0: int)
+        DigitalInput(0)
         if self.stage == self.IDLE:
             # perform checks
             self.stage = self.ARM_DOWN # used to have 2 equal signs
