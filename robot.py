@@ -13,6 +13,7 @@ from subsystems.intake import Intake
 from subsystems.arm import Arm
 from subsystems.imu import IMU
 from subsystems.climb import Climb
+from commands.auto_drive import autoDrive
 
 # import commands
 from commands.amp_align import AmpAlign
@@ -145,9 +146,10 @@ class MyRobot(wpilib.TimedRobot):
         amp_align_button_pressed = self.operator_controller.getYButton()
         amp_shoot_button_pressed = self.operator_controller.getBButton()
         intake_button_pressed = self.operator_controller.getRightBumper()
-        outtake_button_pressed = self.operator_controller.getLeftBumper() 
+        outtake_button_pressed = self.operator_controller.getLeftBumper()
         amp_blocking_position_button_pressed = self.operator_controller.getPOV() == 0
-        inside_chassis_position_button_pressed = self.operator_controller.getPOV() == 90
+        # inside_chassis_position_button_pressed = self.operator_controller.getPOV() == 90
+        auto_get_note = self.operator_controller.getPOV() == 90
         intake_position_button_pressed = self.operator_controller.getPOV() == 180
         shooting_position_button_pressed = self.operator_controller.getPOV() == 270
         arm_up_button_pressed = self.operator_controller.getLeftTriggerAxis() == 1
@@ -199,8 +201,10 @@ class MyRobot(wpilib.TimedRobot):
 
         elif arm_up_button_pressed:
             self.arm.desired_position = 80
-        elif inside_chassis_position_button_pressed:
-            self.arm.desired_position = 40
+        # elif inside_chassis_position_button_pressed:  
+        #     self.arm.desired_position = 40
+        elif auto_get_note:
+            autoDrive()
         elif shooting_position_button_pressed:
             self.arm.desired_position = 20
         elif intake_position_button_pressed:

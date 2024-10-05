@@ -60,7 +60,7 @@ class AutoIntake:
     def auto_intake(self):
         if self.stage == self.IDLE:
             # perform checks
-            self.stage == self.ARM_DOWN
+            self.stage = self.ARM_DOWN # used to have 2 equal signs
 
         elif self.stage == self.ARM_DOWN:
             self.descend.auto_descend()
@@ -102,6 +102,3 @@ class AutoIntake:
 
         elif self.stage == self.FINISHED:
             self.stage = self.IDLE
-
-        
-
