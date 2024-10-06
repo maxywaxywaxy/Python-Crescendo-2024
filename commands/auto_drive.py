@@ -21,6 +21,10 @@ class autoDrive:
         note_distance = self.notedata[0] / 320  # from robot positon
         note_offset = self.notedata[1] / 240    # from robot direction
 
+        # if no note detected, output no turning direction
+        if (self.notedata[2] == 0):
+            return 0
+
 
         # self.shooter.shooter_spin(1)
         # tank_drive(self, left_joystick, right_joystick)
@@ -28,7 +32,6 @@ class autoDrive:
 
         # if needed: https://www.desmos.com/calculator/cbyz2i6qkd
 
-        # what does this do?
         error_margin = 0.1
         low_power = 0.15
 
@@ -41,6 +44,7 @@ class autoDrive:
         else:
             turning_speed = note_offset * 0.5
 
-        drive_speed = 0
+        # drive_speed = 0
+        # self.drive.mecanum_drive_robot_oriented(0, -drive_speed, turning_speed)
 
-        self.drive.mecanum_drive_robot_oriented(0, -drive_speed, turning_speed)
+        return turning_speed

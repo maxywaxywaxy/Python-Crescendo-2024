@@ -207,13 +207,21 @@ class MyRobot(wpilib.TimedRobot):
             self.arm.desired_position = 80
         # elif inside_chassis_position_button_pressed:  
         #     self.arm.desired_position = 40
-        elif auto_get_note:
-            self.auto_drive.go_to_note()
+
+        # v MOVED v
+        # elif auto_get_note:
+        #     auto_turning = self.auto_drive.go_to_note()
         elif shooting_position_button_pressed:
             self.arm.desired_position = 20
         elif intake_position_button_pressed:
             self.arm.soft_drop()
             self.arm.desired_position = 0
+        
+        if auto_get_note:
+            auto_turning = self.auto_drive.go_to_note()
+        else:
+            auto_turning = 0
+            
        # else:
             #self.arm.desired_position = self.arm.get_arm_pitch()
         # if (not intake_position_button_pressed):
@@ -275,8 +283,8 @@ class MyRobot(wpilib.TimedRobot):
             # get the twist of our driver joystick
             joystick_turning = self.driver_controller.getZ()
 
-            # run field oriented drive based on joystick values
-            self.drive.field_oriented_drive(joystick_x, joystick_y, joystick_turning)
+            # run field oriented drive based on joystick values and note direction
+            self.drive.field_oriented_drive(joystick_x, joystick_y, joystick_turning + auto_turning)
             
             # if we click button 11 on the flight stick, reset the IMU yaw
             if reset_imu_button_pressed:
