@@ -11,8 +11,8 @@ class Intake:
 
     def intake_spin(self, speed):
         #spins the intake motor
-        self.intake_top_motor.set(-speed)
-        self.intake_bot_motor.set(-speed)
+        self.intake_top_motor.set(-speed*.6)
+        self.intake_bot_motor.set(-speed*.4)
 
     def stop(self):
         #stops the intake motors

@@ -30,22 +30,17 @@ class autoDrive:
 
         # what does this do?
         error_margin = 0.1
+        low_power = 0.15
 
-        if (note_offset >= -error_margin):
+        if (note_offset >= -error_margin and note_offset < 0):
+            turning_speed = -low_power
 
-            if (note_offset < 0):
-                turning_speed = -error_margin
-
-            elif (note_offset <= error_margin):
-                turning_speed = error_margin
-
-            else:
-                turning_speed = sin(note_offset)
+        elif (note_offset >= 0 and note_offset <= error_margin):
+            turning_speed = low_power
 
         else:
-            turning_speed = sin(note_offset)
-        
-        turning_speed /= 2
-        drive_speed = 0.1
-        
+            turning_speed = note_offset * 0.5
+
+        drive_speed = 0
+
         self.drive.mecanum_drive_robot_oriented(0, -drive_speed, turning_speed)
