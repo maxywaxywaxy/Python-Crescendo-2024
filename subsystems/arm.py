@@ -21,7 +21,7 @@ class Arm:
         # # init gravity compensation
         # self.gravity_compensation = 0
 
-        #calculating gravity compensation
+        # calculating gravity compensation
         self.gravity_comp = 0.14 * math.cos(self.get_arm_pitch() * math.pi / 180)
 
         #make previous error zero
@@ -33,7 +33,11 @@ class Arm:
         # init shooting override value
         self.shooting_override = False
         self.shooting_holding_value = 0
-        self.arm_pid = PID(0.0027, 0.00002, 0.02048, 0)
+        # p=0.0027 too low starting point
+        # p=0.0037 too low
+        # p=0.0047
+
+        self.arm_pid = PID(0.0047, 0.00002, 0.02048*5, 0)
 
     def set_speed(self, speed):
         self.arm_motor_left_front.set(speed)
@@ -44,7 +48,8 @@ class Arm:
 
     #function to get the angle (pitch) of the arm
     def get_arm_pitch(self):
-        return self.arm_imu.get_pitch() + 87.2314
+        #return self.arm_imu.get_pitch() + 87.2314
+        return 87.2314 - self.arm_imu.get_pitch()
     
     # function to stop spinning the arm motors
     def stop(self):

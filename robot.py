@@ -32,7 +32,8 @@ class MyRobot(wpilib.TimedRobot):
             # create reference to our intake motor
         #self.intake_motor = rev.CANSparkMax(constants.INTAKE_MOTOR_ID, rev.CANSparkLowLevel.MotorType.kBrushless)
         print("Robot init 1")
-        self.intake_motor = rev.CANSparkMax(constants.INTAKE_MOTOR_ID, rev.CANSparkLowLevel.MotorType.kBrushless)
+        self.intake_top_motor = rev.CANSparkMax(constants.INTAKE_TOP_MOTOR_ID, rev.CANSparkLowLevel.MotorType.kBrushless)
+        self.intake_bot_motor = rev.CANSparkMax(constants.INTAKE_BOT_MOTOR_ID, rev.CANSparkLowLevel.MotorType.kBrushless)
         print("Robot init 2")
         # create reference to our Falcon 500 motors for driving
         self.front_right = phoenix5._ctre.WPI_TalonFX(constants.FRONT_RIGHT_ID)
@@ -81,7 +82,7 @@ class MyRobot(wpilib.TimedRobot):
         
         # instances of our subsystems - passing in references to motors, sensors, etc.
         self.arm = Arm(self.arm_motor_left_front, self.arm_motor_left_back, self.arm_motor_right_front, self.arm_motor_right_back, self.arm_imu)
-        self.intake = Intake(self.intake_motor)
+        self.intake = Intake(self.intake_top_motor, self.intake_bot_motor)
         self.drive = Drive(self.front_right, self.front_left, self.back_left, self.back_right, self.arm_imu)
         self.shooter = Shooter(self.shooter_lower_motor, self.shooter_upper_motor)
         self.climb = Climb(self.climb_motor_left_front, self.climb_motor_right_front, self.climb_motor_left_back, self.climb_motor_right_back)
@@ -96,6 +97,7 @@ class MyRobot(wpilib.TimedRobot):
         #create instances of autonomous abilities for our robot
         self.amp_align = AmpAlign(self.drive, self.networking)
         self.descend = Descend(self.arm)
+        self.auto_drive = autoDrive(self.drive, self.networking)
 
         # switch to turn on or off drive
         self.enable_drive = True
@@ -135,7 +137,9 @@ class MyRobot(wpilib.TimedRobot):
     def teleopPeriodic(self):
         
         #calculating gravity compensation
-        self.arm.gravity_comp = 0.14 * math.cos(self.arm.get_arm_pitch() * math.pi / 180)
+        # 0.14 too light
+        # 0.21 seems right, arm stays still
+        self.arm.gravity_comp = 0.21 * math.cos(self.arm.get_arm_pitch() * math.pi / 180)
 
         #print(f"desired: {self.arm.desired_position}, current: {self.arm.get_arm_pitch()}"
 
@@ -159,7 +163,7 @@ class MyRobot(wpilib.TimedRobot):
         
         # ---------- INTAKE ----------
         if intake_button_pressed:
-            self.intake.intake_spin(1)
+            self.intake.intake_spin(0.5)
             #self.auto_intake.auto_intake_with_sensors()
                          
         elif outtake_button_pressed:
@@ -204,7 +208,7 @@ class MyRobot(wpilib.TimedRobot):
         # elif inside_chassis_position_button_pressed:  
         #     self.arm.desired_position = 40
         elif auto_get_note:
-            autoDrive()
+            self.auto_drive.go_to_note()
         elif shooting_position_button_pressed:
             self.arm.desired_position = 20
         elif intake_position_button_pressed:
@@ -213,12 +217,14 @@ class MyRobot(wpilib.TimedRobot):
        # else:
             #self.arm.desired_position = self.arm.get_arm_pitch()
         # if (not intake_position_button_pressed):
-        # if (self.arm.desired_position > 0):
-        #     self.arm.arm_to_angle(self.arm.desired_position)
+        if (self.arm.desired_position > 0):
+            self.arm.arm_to_angle(self.arm.desired_position)
+            # self.arm.set_speed(self.arm.gravity_comp)
+            pass
 
         self.arm_timer = self.arm_timer + 1
         if(self.arm_timer % 25 == 0):
-            print("arm angle = ", self.arm.get_arm_pitch(), "destination angle = ", self.arm.desired_position, " ", self.arm.arm_pid.integral, " ", self.arm.start_angle)
+            print("arm angle = ", self.arm.get_arm_pitch(), self.arm_imu.getYawPitchRoll()[1],"destination angle = ", self.arm.desired_position, " ", self.arm.arm_pid.integral, " ", self.arm.start_angle)
         # if arm_up_button_pressed:
         #     print (self.arm.get_arm_pitch())
         #     self.arm.arm_to_angle(80)
