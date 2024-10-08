@@ -147,8 +147,8 @@ class Arm:
         # spin motors
         self.set_speed(motor_power)
 
-        if printout:
-            print(f"angle: {self.get_arm_pitch()}, kg: {self.kg_interpolation(current_angle)}, motor power: {motor_power}")
+        #if printout:
+           # print(f"angle: {self.get_arm_pitch()}, kg: {self.kg_interpolation(current_angle)}, motor power: {motor_power}")
     
     #make the arm fall slower when reaching pitch = 0
     
