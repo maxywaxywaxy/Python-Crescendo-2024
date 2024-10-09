@@ -18,6 +18,7 @@ from commands.auto_drive import autoDrive
 # import commands
 from commands.amp_align import AmpAlign
 from commands.descend import Descend
+from commands.auto_intake import AutoIntake
 
 # import autonomous code
 from commands.autonomous import Autonomous
@@ -46,10 +47,9 @@ class MyRobot(wpilib.TimedRobot):
         self.back_right.setInverted(True)
         
         print("Robot init 3")
-        # create a reference to our drivimg IMU
-        #self.imu_motor_controller = phoenix5._ctre.WPI_TalonSRX(constants.IMU_ID)
-        #self.imu = IMU(self.imu_motor_controller)
-        #self.imu = 0
+        #create a reference to our drivimg IMU
+        self.drive_imu_motor_controller = phoenix5._ctre.WPI_TalonSRX(constants.IMU_ID)
+        self.drive_imu = IMU(self.drive_imu_motor_controller)
         print("Robot init 4")
 
         #create reference to our Falcon motors
@@ -83,7 +83,7 @@ class MyRobot(wpilib.TimedRobot):
         # instances of our subsystems - passing in references to motors, sensors, etc.
         self.arm = Arm(self.arm_motor_left_front, self.arm_motor_left_back, self.arm_motor_right_front, self.arm_motor_right_back, self.arm_imu)
         self.intake = Intake(self.intake_top_motor, self.intake_bot_motor)
-        self.drive = Drive(self.front_right, self.front_left, self.back_left, self.back_right, self.arm_imu)
+        self.drive = Drive(self.front_right, self.front_left, self.back_left, self.back_right, self.drive_imu)
         self.shooter = Shooter(self.shooter_lower_motor, self.shooter_upper_motor)
         self.climb = Climb(self.climb_motor_left_front, self.climb_motor_right_front, self.climb_motor_left_back, self.climb_motor_right_back)
 
@@ -98,6 +98,7 @@ class MyRobot(wpilib.TimedRobot):
         self.amp_align = AmpAlign(self.drive, self.networking)
         self.descend = Descend(self.arm)
         self.auto_drive = autoDrive(self.drive, self.networking)
+        self.auto_intake = AutoIntake(self.drive, self.descend, self.intake, self.networking, self.arm_imu)
 
         # switch to turn on or off drive
         self.enable_drive = True
@@ -157,14 +158,18 @@ class MyRobot(wpilib.TimedRobot):
         intake_position_button_pressed = self.operator_controller.getPOV() == 180
         shooting_position_button_pressed = self.operator_controller.getLeftTriggerAxis() == 1
         arm_up_button_pressed = self.operator_controller.getPOV() == 270
+        sensor_intake_button_pressed = self.operator_controller.getPOV == 360
 
-        under_stage_button_pressed = self.driver_controller.getTriggerPressed()
-        reset_imu_button_pressed = self.driver_controller.getRawButton(11)
+        #under_stage_button_pressed = self.driver_controller.getTriggerPressed()
+        reset_drive_imu_button_pressed = self.driver_controller.getRawButton(11)
         
         # ---------- INTAKE ----------
         if intake_button_pressed:
             self.intake.intake_spin(0.5)
             #self.auto_intake.auto_intake_with_sensors()
+        
+        elif sensor_intake_button_pressed:
+            self.auto_intake.auto_intake_with_sensors()
                          
         elif outtake_button_pressed:
             self.intake.intake_spin(-0.5)
@@ -218,7 +223,7 @@ class MyRobot(wpilib.TimedRobot):
         elif intake_position_button_pressed:
             # self.arm.soft_drop()
             # self.arm.desired_position = 0
-            self.arm.desired_position = math.max(0, self.arm.desired_position - 1) # should move about 50 degress/second
+            self.arm.desired_position = max(0, self.arm.desired_position - 1) # should move about 50 degress/second
         """"
         if auto_get_note:
             auto_turning = self.auto_drive.go_to_note()
@@ -237,43 +242,45 @@ class MyRobot(wpilib.TimedRobot):
         self.arm_timer = self.arm_timer + 1
         if(self.arm_timer % 25 == 0):
             print("arm angle = ", self.arm.get_arm_pitch(), self.arm_imu.getYawPitchRoll()[1],"destination angle = ", self.arm.desired_position, " ", self.arm.arm_pid.integral, " ", self.arm.start_angle)
-        # if arm_up_button_pressed:
-        #     print (self.arm.get_arm_pitch())
-        #     self.arm.arm_to_angle(80)
-        #     #if (self.arm.get_arm_pitch() < 60):
-        #         #print( "M") # self.arm.set_speed(0.14 * math.cos(self.arm.get_arm_pitch() * math.pi / 180))
+        #ARM TESTS
+        """
+        if arm_up_button_pressed:
+            print (self.arm.get_arm_pitch())
+            self.arm.arm_to_angle(80)
+            #if (self.arm.get_arm_pitch() < 60):
+                #print( "M") # self.arm.set_speed(0.14 * math.cos(self.arm.get_arm_pitch() * math.pi / 180))
 
-        # #elif intake_position_button_pressed:
-        #    #print (self.arm.get_pitch())
-        #    #self.arm.arm_to_angle()
+        #elif intake_position_button_pressed:
+           #print (self.arm.get_pitch())
+           #self.arm.arm_to_angle()
 
-        # elif inside_chassis_position_button_pressed:
-        #     print (self.arm.get_arm_pitch())
-        #     self.arm.arm_to_angle(40)
+        elif inside_chassis_position_button_pressed:
+            print (self.arm.get_arm_pitch())
+            self.arm.arm_to_angle(40)
 
-        # elif shooting_position_button_pressed:
-        #     print(self.arm.get_arm_pitch())
-        #     self.arm.arm_to_angle(20)
+        elif shooting_position_button_pressed:
+            print(self.arm.get_arm_pitch())
+            self.arm.arm_to_angle(20)
 
-        # # drop the arm softly to not damage it
-        # elif (intake_position_button_pressed):
-        #     #print(self.arm.get_arm_pitch())
-        #     #implementing soft drop (testing w/ gravity)
-        #     #angle_one = self.angle_two
-        #     #self.angle_two = self.arm.get_arm_pitch()
-        #     #angle_diff = angle_one - self.angle_two
-        #     self.arm.soft_drop()
+        # drop the arm softly to not damage it
+        elif (intake_position_button_pressed):
+            #print(self.arm.get_arm_pitch())
+            #implementing soft drop (testing w/ gravity)
+            #angle_one = self.angle_two
+            #self.angle_two = self.arm.get_arm_pitch()
+            #angle_diff = angle_one - self.angle_two
+            self.arm.soft_drop()
             
-        #     #if(angle_diff > 0 and angle_diff < 10):
-        #         #self.arm.soft_drop(angle_diff)
+            #if(angle_diff > 0 and angle_diff < 10):
+                #self.arm.soft_drop(angle_diff)
 
-        # elif not amp_blocking_position_button_pressed:
-        #     if (self.arm.get_arm_pitch() > 70):
-        #         self.arm.set_speed(-0.05)
-        #     else:
-        #         self.arm.set_speed(0.06)
+        elif not amp_blocking_position_button_pressed:
+            if (self.arm.get_arm_pitch() > 70):
+                self.arm.set_speed(-0.05)
+            else:
+                self.arm.set_speed(0.06)
  
-        
+        """
         # check if drive is enabled
         if self.enable_drive:
             # get the x and y axis of the left joystick on our controller
@@ -292,8 +299,8 @@ class MyRobot(wpilib.TimedRobot):
             self.drive.field_oriented_drive(joystick_x, joystick_y, joystick_turning)
             
             # if we click button 11 on the flight stick, reset the IMU yaw
-            if reset_imu_button_pressed:
-                self.arm_imu.reset_yaw()
+            if reset_drive_imu_button_pressed:
+                self.drive_imu.reset_yaw()
         
         
 # run our robot code
