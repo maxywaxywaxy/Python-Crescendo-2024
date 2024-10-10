@@ -27,7 +27,7 @@ from commands.autonomous import Autonomous
 from utils import constants
 
 #import test
-from testing.ir_tests import IRTest
+from commands.ir_checking import IRTest
 # create our base robot class
 class MyRobot(wpilib.TimedRobot):
     # initialize motors and sensors - create references to physical parts of our robot
