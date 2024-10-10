@@ -26,6 +26,8 @@ from commands.autonomous import Autonomous
 # import our constants which serve as "settings" for our robot/code, mainly IDs for CAN devices - motors, IMUs, and controllers
 from utils import constants
 
+#import test
+from testing.ir_tests import IRTest
 # create our base robot class
 class MyRobot(wpilib.TimedRobot):
     # initialize motors and sensors - create references to physical parts of our robot
@@ -108,7 +110,8 @@ class MyRobot(wpilib.TimedRobot):
         #arm angle timer initiation
         self.arm_timer = 0
 
-        #testing variable
+        #testing
+        self.ir_test = IRTest(self.networking)
         #self.up = False
     # setup before our robot transitions to autonomous
     def autonomousInit(self):
@@ -162,7 +165,11 @@ class MyRobot(wpilib.TimedRobot):
 
         #under_stage_button_pressed = self.driver_controller.getTriggerPressed()
         reset_drive_imu_button_pressed = self.driver_controller.getRawButton(11)
+        test_IR_button_pressed = self.driver_controller.getRawButton(12)
         
+        #tests ir sensors
+        if test_IR_button_pressed:
+            self.ir_test.test()
         # ---------- INTAKE ----------
         if intake_button_pressed:
             self.intake.intake_spin(0.5)
