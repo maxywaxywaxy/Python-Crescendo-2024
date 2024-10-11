@@ -3,7 +3,8 @@
 
 import math
 from utils.math_functions import interpolation_array
-
+from robotpy_ftc.opmode import LinearOpMode
+from robotpy_ftc.hardware import  DcMotor
 from phoenix5._ctre import WPI_TalonFX
 from subsystems.imu import IMU
 
@@ -148,4 +149,26 @@ class Drive:
         self.front_right.set(front_right_speed)
         self.back_left.set(back_left_speed)
         self.back_right.set(back_right_speed)
+    # figure out how far a motor has gone in inches
+    def inches_driven(self):
+        # grab value from encoder
+        encoder_distance = self.falcon_motor.get_sensor_position()
+        encoder_positions = 2048
+        wheel_circumference = 13.351768975
+        gear_ratio = 1/4
         
+        inches_distance = encoder_distance * gear_ratio * wheel_circumference / encoder_positions
+        return inches_distance
+    #drive a certain distance, in inches
+    def drive_inches(self, distance):
+        current_distance = start_distance = self.front_right.inches_driven() + self.front_left.inches_driven() + self.back_right.inches_driven() + self.back_left.inches_driven() / 4
+        while (current_distance < distance):
+            current_distance = self.front_right.inches_driven() + self.front_left.inches_driven() + self.back_right.inches_driven() + self.back_left.inches_driven() / 4 - start_distance
+            max_speed = 0.3
+            min_speed = 0.1
+            power_ramp_up_distance = 12
+            divisor = power_ramp_up_distance/(max_speed-min_speed)
+            driving_speed = min(min(current_distance/divisor, (distance-current_distance)/divisor) + min_speed, max_speed)
+            self.set_left_speed(driving_speed)
+            self.set_right_speed(driving_speed)
+        return

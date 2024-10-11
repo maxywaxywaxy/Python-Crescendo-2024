@@ -113,6 +113,7 @@ class MyRobot(wpilib.TimedRobot):
         #testing variable
         self.ir_test = IR_TEST(self.networking)
         #self.up = False
+       
     # setup before our robot transitions to autonomous
     def autonomousInit(self):
         # create instance of our autonomous code
@@ -165,8 +166,13 @@ class MyRobot(wpilib.TimedRobot):
 
         #under_stage_button_pressed = self.driver_controller.getTriggerPressed()
         reset_drive_imu_button_pressed = self.driver_controller.getRawButton(11)
-        ir_testing_button_pressed = self.driver_controller.getRawButton(12)
-
+        
+        test_IR_button_pressed = self.driver_controller.getRawButton(12)
+        
+        #tests ir sensors
+        if test_IR_button_pressed:
+            self.ir_test.test()
+            
         # ---------- INTAKE ----------
         if intake_button_pressed:
             self.intake.intake_spin(0.5)
