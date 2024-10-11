@@ -36,12 +36,14 @@ class AutoIntake:
         if self.stage == self.IDLE:
             print("idle")
             #checks if there is a note
+            
+            print("idle")
             if self.IR_Loading.get() == 0 or self.IR_Ready.get() == 0 :
-                print("sensors broken")
+                print ("note already in")
                 return
             #checks if the arm is down
-            elif self.imu.get_pitch() >= 5:
-                print ("too high")
+            if self.imu.get_pitch() >= 5:
+                print("arm too high")
                 return
             #if both tests passed, begin to intake
             self.stage = self.INTAKE_1
@@ -64,6 +66,9 @@ class AutoIntake:
             
         elif self.stage == self.FINISHED:
             print("finished")
+            pass
+
+        elif self.stage == self.FINISHED:
             pass
 
     def auto_intake(self):
