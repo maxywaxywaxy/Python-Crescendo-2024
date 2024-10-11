@@ -34,7 +34,9 @@ class AutoIntake:
 
     def auto_intake_with_sensors(self):
         if self.stage == self.IDLE:
+            print("idle")
             #checks if there is a note
+            
             print("idle")
             if self.IR_Loading.get() == 0 or self.IR_Ready.get() == 0 :
                 print ("note already in")
@@ -61,6 +63,10 @@ class AutoIntake:
             #if beam 2 broken:
             if self.IR_Ready.get() == 0 :
                 self.stage = self.FINISHED
+            
+        elif self.stage == self.FINISHED:
+            print("finished")
+            pass
 
         elif self.stage == self.FINISHED:
             pass
