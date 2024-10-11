@@ -7,6 +7,7 @@ from subsystems.intake import Intake
 
 from phoenix5.sensors import AbsoluteSensorRange
 import phoenix5
+import math
 
 #switches on robot that change values to run different autonomous codes for each.
 class Autonomous:
@@ -60,7 +61,7 @@ class Autonomous:
             print("releasing kickstand")
 
         elif self.stage == self.KICKSTAND:
-            self.arm.desired_position = 95
+            self.arm.desired_position = 90
 
             if abs(self.arm.desired_position - self.arm.get_arm_pitch()) < 5:
                 self.stage = self.MOVING_ARM_1
@@ -68,7 +69,7 @@ class Autonomous:
                 self.arm.shooting_override = False   
 
         elif self.stage == self.MOVING_ARM_1:
-            self.arm.desired_position = 16
+            self.arm.desired_position = max(14, self.arm.desired_position-1)
             
             if abs(self.arm.desired_position - self.arm.get_arm_pitch()) < 3:
                 self.stage = self.REVVING_1
@@ -78,7 +79,7 @@ class Autonomous:
         elif self.stage == self.REVVING_1:
             self.shooter.shooter_spin(1)
             
-            if self.revving_1_start_time + 1 < self.timer.getFPGATimestamp():
+            if self.revving_1_start_time + .5 < self.timer.getFPGATimestamp():
                 self.stage = self.SHOOTING_1
                 self.shooting_1_start_time = self.timer.getFPGATimestamp()
                 print("shooting")
@@ -87,7 +88,7 @@ class Autonomous:
             self.shooter.shooter_spin(1)
             self.intake.intake_spin(1)
 
-            if self.shooting_1_start_time + 1.5 < self.timer.getFPGATimestamp():
+            if self.shooting_1_start_time + 1 < self.timer.getFPGATimestamp():
                 self.stage = self.BACKING_UP
                 self.backing_up_start_time = self.timer.getFPGATimestamp()
                 print("backing up")
