@@ -7,7 +7,6 @@ from subsystems.intake import Intake
 
 from phoenix5.sensors import AbsoluteSensorRange
 import phoenix5
-import math
 
 #switches on robot that change values to run different autonomous codes for each.
 class Autonomous:
@@ -54,40 +53,36 @@ class Autonomous:
         #self.encoder = self.drive.back_left.getSensorCollection()        
 
     def one_note_auto(self):
+        self.timer.start()
         if self.stage == self.IDLE:
-            # perform checks
             self.stage = self.KICKSTAND
             self.arm.shooting_override = False
             print("releasing kickstand")
-
+        
         elif self.stage == self.KICKSTAND:
-            self.arm.desired_position = 90
-
-            if abs(self.arm.desired_position - self.arm.get_arm_pitch()) < 5:
+            self.arm.desired_position = 86
+            if abs(self.arm.desired_position - self.arm.get_arm_pitch()) < 2:
                 self.stage = self.MOVING_ARM_1
                 print("moving arm")
-                self.arm.shooting_override = False   
-
+                self.arm.shooting_override = False
+        
         elif self.stage == self.MOVING_ARM_1:
-            self.arm.desired_position = max(14, self.arm.desired_position-1)
-            
-            if abs(self.arm.desired_position - self.arm.get_arm_pitch()) < 3:
+            self.arm.desired_position = max(13, self.arm.desired_position - 1)
+            if abs(16-self.arm.get_arm_pitch()) < 3:
                 self.stage = self.REVVING_1
                 self.revving_1_start_time = self.timer.getFPGATimestamp()
                 self.arm.shooting_override = True
-
+        
         elif self.stage == self.REVVING_1:
-            self.shooter.shooter_spin(1)
-            
+            self.shooter.shooter_spin(.9)
             if self.revving_1_start_time + .5 < self.timer.getFPGATimestamp():
                 self.stage = self.SHOOTING_1
                 self.shooting_1_start_time = self.timer.getFPGATimestamp()
                 print("shooting")
-
+        
         elif self.stage == self.SHOOTING_1:
+            self.intake.intake_spin(.5)
             self.shooter.shooter_spin(1)
-            self.intake.intake_spin(1)
-
             if self.shooting_1_start_time + 1 < self.timer.getFPGATimestamp():
                 self.stage = self.BACKING_UP
                 self.backing_up_start_time = self.timer.getFPGATimestamp()
@@ -105,9 +100,9 @@ class Autonomous:
 
         elif self.stage == self.FINISHED:
             self.drive.tank_drive(0, 0)
-
-        self.arm.arm_to_angle(self.arm.desired_position)
-
+            self.arm.desired_position = max(0, self.arm.desired_position - 1)
+            self.arm.arm_to_angle(self.arm.desired_position)
+        
 
     def two_note_auto(self):
         if self.stage == self.IDLE:
