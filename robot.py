@@ -26,6 +26,8 @@ from commands.autonomous import Autonomous
 # import our constants which serve as "settings" for our robot/code, mainly IDs for CAN devices - motors, IMUs, and controllers
 from utils import constants
 
+from commands.ir_examine import IR_TEST
+
 # create our base robot class
 class MyRobot(wpilib.TimedRobot):
     # initialize motors and sensors - create references to physical parts of our robot
@@ -109,6 +111,7 @@ class MyRobot(wpilib.TimedRobot):
         self.arm_timer = 0
 
         #testing variable
+        self.ir_test = IR_TEST(self.networking)
         #self.up = False
     # setup before our robot transitions to autonomous
     def autonomousInit(self):
@@ -157,22 +160,29 @@ class MyRobot(wpilib.TimedRobot):
         # auto_get_note = self.operator_controller.getPOV() == 90
         intake_position_button_pressed = self.operator_controller.getPOV() == 180
         shooting_position_button_pressed = self.operator_controller.getLeftTriggerAxis() == 1
-        arm_up_button_pressed = self.operator_controller.getPOV() == 270
-        sensor_intake_button_pressed = self.operator_controller.getPOV == 360
+        #arm_up_button_pressed = self.operator_controller.getPOV() == 270
+        sensor_intake_button_pressed = self.operator_controller.getPOV == 270
 
         #under_stage_button_pressed = self.driver_controller.getTriggerPressed()
         reset_drive_imu_button_pressed = self.driver_controller.getRawButton(11)
-        
+        ir_testing_button_pressed = self.driver_controller.getRawButton(12)
+
         # ---------- INTAKE ----------
         if intake_button_pressed:
             self.intake.intake_spin(0.5)
-            #self.auto_intake.auto_intake_with_sensors()
+        
+        elif sensor_intake_button_pressed:
+            self.auto_intake.auto_intake_with_sensors()
+            print("got in")
         
         elif sensor_intake_button_pressed:
             self.auto_intake.auto_intake_with_sensors()
                          
         elif outtake_button_pressed:
             self.intake.intake_spin(-0.5)
+
+        elif ir_testing_button_pressed:
+            self.ir_test.test()
 
         else:
             self.intake.stop()
@@ -204,21 +214,21 @@ class MyRobot(wpilib.TimedRobot):
         #desired positions: up, down, shooting angle
         if amp_blocking_position_button_pressed:
             # PREVIOUSLY 85
-            self.arm.desired_position = 67
+            self.arm.desired_position = 80
             # self.arm.arm_to_angle(self.arm.desired_position)
         
             # 0.25 = too strong
             # 0.14 = 
             # 0.125 = slightly too weak
-        elif arm_up_button_pressed:
-            self.arm.desired_position = 80
+        # elif arm_up_button_pressed:
+        #     self.arm.desired_position = 80
         # elif inside_chassis_position_button_pressed:  
         #     self.arm.desired_position = 40
         # v MOVED v
         # elif auto_get_note:
         #     auto_turning = self.auto_drive.go_to_note()
         elif shooting_position_button_pressed:
-            self.arm.desired_position = 20
+            self.arm.desired_position = 12
             
         elif intake_position_button_pressed:
             # self.arm.soft_drop()

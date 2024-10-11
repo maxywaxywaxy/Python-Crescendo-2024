@@ -35,27 +35,35 @@ class AutoIntake:
     def auto_intake_with_sensors(self):
         if self.stage == self.IDLE:
             #checks if there is a note
-            if self.IR_Loading.get() == 1 or self.IR_Ready.get() == 1 :
+            print("idle")
+            if self.IR_Loading.get() == 0 or self.IR_Ready.get() == 0 :
+                print ("note already in")
                 return
             #checks if the arm is down
             if self.imu.get_pitch() >= 5:
+                print("arm too high")
                 return
             #if both tests passed, begin to intake
             self.stage = self.INTAKE_1
 
         #intake normally until first beam broken
         elif self.stage == self.INTAKE_1:
+            print("intake_1")
             self.intake.intake_spin(1)
             #if beam 1 broken:
-            if self.IR_Loading.get() == 1 :
+            if self.IR_Loading.get() == 0 :
                 self.stage = self.INTAKE_2
 
         #intake slowly until second beam broken
         elif self.stage == self.INTAKE_2:
+            print("intake_2")
             self.intake.intake_spin(.3)
             #if beam 2 broken:
-            if self.IR_Ready.get() == 1 :
+            if self.IR_Ready.get() == 0 :
                 self.stage = self.FINISHED
+
+        elif self.stage == self.FINISHED:
+            pass
 
     def auto_intake(self):
         DigitalInput(0)
